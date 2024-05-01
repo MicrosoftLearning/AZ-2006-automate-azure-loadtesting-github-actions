@@ -1,4 +1,6 @@
-# INF99X: Sample Course
+# Automate Azure Load Testing with GitHub Actions
+
+Looking for the **[HTML pages](https://microsoftlearning.github.io/AZ-2006-automate-azure-loadtesting-github-actions/)**?
 
 **Are you an MCT?** - Have a look at our [GitHub User Guide for MCTs](https://microsoftlearning.github.io/MCT-User-Guide/)
 

@@ -4,7 +4,7 @@ lab:
     module: 'Module 1: Implement GitHub Actions'
 ---
 
-# Exercise: Create a workflow that validates code on a pull request
+# Overview
 
 In this exercise, you create a GitHub workflow that performs an action when you merge a pull request.
 
@@ -21,4 +21,4 @@ When you select the **Start the exercise on GitHub** link, you're navigated to a
 * After you make your own repository from the template, wait about 20 seconds and refresh.
 * Follow the instructions in the repository's README to understand how the exercise works, its learning objectives, and how to successfully complete the exercise.
 
-> [Start the exercise on GitHub](https://github.com/skills/hello-github-actions)
+#### [Start the exercise on GitHub](https://github.com/skills/hello-github-actions)

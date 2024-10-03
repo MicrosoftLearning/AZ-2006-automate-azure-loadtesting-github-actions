@@ -200,10 +200,10 @@ Update your GitHub Actions workflow to run a load test for your Azure load testi
 1. In your repository navigate to .github\workflows and select workflow.yml
 
 1. Note that the following actions are in the file under the job LoadTest:
-    - the `actions/checkout` action to check out the repository with the load test input files.
-    - the `azure/login` action to authenticate with Azure by using the stored credentials.
-    - the `azure/load-testing` action to run the load test.
-    - the `actions/upload-artifact` action to publish the test results as artifacts in your GitHub Actions workflow run.
+    * the `actions/checkout` action to check out the repository with the load test input files.
+    * the `azure/login` action to authenticate with Azure by using the stored credentials.
+    * the `azure/load-testing` action to run the load test.
+    * the `actions/upload-artifact` action to publish the test results as artifacts in your GitHub Actions workflow run.
 1. Push a commit to main to trigger the workflow.
 1. Go to the Actions tab in your GitHub repository to see the workflow run.
 
@@ -211,6 +211,5 @@ Update your GitHub Actions workflow to run a load test for your Azure load testi
 
 When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. If you published the test results as a pipeline artifact, you can also download a CSV file for further reporting.
 
-![](../)
+![Screenshot that shows the workflow logging information.](./media/github-actions-workflow-completed.png)
 
-:::image type="content" source="../media/github-actions-workflow-completed.png" alt-text="Screenshot that shows the workflow logging information.":::

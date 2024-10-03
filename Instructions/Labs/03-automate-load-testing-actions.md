@@ -51,10 +51,7 @@ The sample application consists of a Node.js web API, which interacts with a NoS
    .\deploymentscript.ps1
    ```
 
-   > [!TIP]
-   > You can install PowerShell on [Linux/WSL](/powershell/scripting/install/installing-powershell-on-linux) or [macOS](/powershell/scripting/install/installing-powershell-on-macos).
-   >
-   > After you install it, you can run the previous command as `pwsh ./deploymentscript.ps1`.
+   > **Tip:** You can install PowerShell on [Linux/WSL](/powershell/scripting/install/installing-powershell-on-linux) or [macOS](/powershell/scripting/install/installing-powershell-on-macos). After you install it, you can run the previous command as `pwsh ./deploymentscript.ps1`.
 
 1. At the prompt, provide:
 
@@ -62,8 +59,7 @@ The sample application consists of a Node.js web API, which interacts with a NoS
    - A unique name for your web app.
    - A location. By default, the location is `eastus`. You can get region codes by running the [Get-AzLocation](/powershell/module/az.resources/get-azlocation) command.
 
-   > [!IMPORTANT]
-   > For your web app's name, use only lowercase letters and numbers. Don't use spaces or special characters.
+   > **Important:** For your web app's name, use only lowercase letters and numbers. Don't use spaces or special characters.
 
 1. After deployment finishes, go to the running sample application by opening `https://<yourappname>.azurewebsites.net` in a browser window.
 
@@ -130,6 +126,8 @@ Create a service principal in the Azure subscription and assign the Load Test Co
           --query "id" -o tsv
       ```
 
+    > **Note:** You might get a `--sdk-auth` deprecation warning when you run this command if you are running an older version of the Azure CLI locally.
+
     The output is a JSON object that represents the service principal. You use this information to authenticate with Azure in the GitHub Actions workflow.
 
     ```json
@@ -141,9 +139,6 @@ Create a service principal in the Azure subscription and assign the Load Test Co
     (...)
     }
     ```
-
-    > [!NOTE]
-    > You might get a `--sdk-auth` deprecation warning when you run this command if you are running an older version of the Azure CLI locally.
 
 1. Copy the output JSON object to the clipboard.
 
@@ -161,9 +156,9 @@ To create a GitHub Actions secret:
 
 1. Select **New repository secret**, enter the secret information, and then select **Add secret** to create a new secret.
 
-    | Field      | Value                                                                                 |
+    | Field | Value |
     | --- | --- |
-    | **Name**   | *AZURE_CREDENTIALS*                                                                   |
+    | **Name**   | *AZURE_CREDENTIALS* |
     | **Secret** | Paste the JSON output from the service principal creation command you copied earlier. |
 
 You can now access your Azure subscription and load testing resource from your GitHub Actions workflow by using the stored credentials.

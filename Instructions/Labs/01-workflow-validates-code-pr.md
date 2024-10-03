@@ -4,7 +4,7 @@ lab:
     module: 'Module 1: Implement GitHub Actions'
 ---
 
-# Exercise: Create a workflow that validates code on a pull request
+# Overview
 
 In this exercise, you create a GitHub workflow that performs an action when you merge a pull request.
 

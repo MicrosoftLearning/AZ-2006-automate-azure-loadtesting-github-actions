@@ -77,7 +77,14 @@ In this task, you will create a resource group and Azure Service Principal. The 
     az provider register --namespace Microsoft.Web
     ```
 
-1. Retrieve your Azure subscription ID with the `az account show` command. This command produces JSON output, please copy and save the GUID in the `"id": <GUID>` field. This is needed to create the service principal.
+1. Run the following command to generate a random name for the web app you deploy to Azure App Service. Copy and save the name the command outputs for use later in that lab.
+
+    ```
+    myAppName=az2006app$RANDOM
+    echo $myAppName
+    ```
+
+1. Retrieve your Azure subscription ID with the `az account show` command. This command produces JSON output, please copy and save the GUID in the `"id": <GUID>` field. This is needed to create the service principal, and later in the lab.
 
 1. Create a service principal with the following `az ad sp` command. Replace `<SUBSCRIPTION-ID>` with the id you copied in the previous step.
 
@@ -91,9 +98,61 @@ In this task, you will create a resource group and Azure Service Principal. The 
 1. On the repository page select **Settings**, then select **Secrets and variables > Actions** in the left navigation pane.
 1. Select **New repository secret** and enter the following information:
     * **NAME**: `AZURE_CREDENTIALS`
-    * **Secret**: Enter the JSON object created when creating the service principal.
+    * **Secret**: Enter the JSON object generated when creating the service principal.
 1. Select **Add secret**.
 
 ### Task 2: Modify and execute the GitHub workflow
 
-In this task, you modify the provided GitHub workflow and execute it to deploy the solution to your own subscription.
+In this task, you modify the provided *eshoponweb-cicd.yml* GitHub workflow and execute it to deploy the solution to your own subscription.
+
+1. In a browser window, go back to your **eShopOnWeb** GitHub repository.
+1. Select **<> Code** and, in the main branch, select the **eshoponweb-cicd.yml** in the **eShopOnWeb/.github/workflows** folder. This workflow defines the CI/CD process for the eShopOnWeb app.
+
+    ![Screenshot showing the location of the file in the folder structure.](./media/eshop-cid-workflow.png)
+1. Select **Edit this file**.
+1. Change the fields in the `env:` section of the file to the following values.
+
+    | Field | Action |
+    |--|--|
+    | RESOURCE-GROUP: | `az2006-rg` |
+    | LOCATION: | `eastus` (Or, the region you selected when creating the resource group.) |
+    | TEMPLATE-FILE: | No changes |
+    | SUBSCRIPTION-ID: | Your subscription id. |
+    | WEBAPP-NAME: | The randomly generated wep app name you created earlier in the lab. |
+
+1. Read the workflow carefully, comments are provided to help you understand the steps in the workflow.
+1. Uncomment the **on** section at the top of the file by deleting the `#`. The workflow triggers with every push to the main branch and also offers manual triggering (`workflow_dispatch`).
+1. Select **Commit changes...** in the top right part of the page.
+1. A pop-up windows will appear. Accept the defaults (committing directly to the main branch) and select **Commit changes**. The workflow will get automatically executed.
+
+### Task 3: Review the GitHub Workflow execution
+
+In this task, you will review the GitHub workflow execution and view the running application.
+
+1.Select **Actions** and you will see the workflow setup before executing.
+
+1. Select the **eShopOnWeb Build and Test** job in the **All workflows** section of the page. 
+
+1. The workflow is composed of two operations: **buildandtest** and **deploy**. You can select either operation and view its progress, or wait until the job is completed.
+
+1. Navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com) and navigate to the **az2006-rg** resource group created before. Note that the GitHub Action, using a bicep template, has created an Azure App Service Plan + App Service in the resource group. 
+
+1. Select the App Service resource (the unique app name generated earlier), and then select **Browse** near the top of the page to view the deployed web app.
+
+## Exercise 3: Clean up resources
+
+In this exercise you delete the resources created earlier in the lab.
+
+1. Navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com) and start the Cloud Shell. Select the **Bash** shell session.
+
+1. Run the following command to delete the `az2006-rg` resource group. It will also remove the App Service Plan and App Service instance.
+
+    ```
+    az group delete -n az2006-rg --no-wait --yes
+    ```
+
+    >**Note**: The command executes asynchronously (set with the `--no-wait` parameter), so while you can run another Azure CLI command immediately afterwards within the same Bash session, it will take a few minutes before the resource groups are actually removed.
+
+## Review
+
+In this lab, you implemented a GitHub Action workflow that deploys an Azure Web App.

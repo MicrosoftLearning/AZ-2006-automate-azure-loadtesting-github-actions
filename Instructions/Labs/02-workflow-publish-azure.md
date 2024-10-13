@@ -38,7 +38,7 @@ In this exercise, you will import the [eShopOnWeb](https://github.com/MicrosoftL
 
 ### Task 1: Import the eShopOnWeb repository
 
-1. In your web browser navigate to [GitHub](http://github.com) and sign in using your account.
+1. In your web browser navigate to GitHub [http://github.com](http://github.com) and sign in using your account.
 1. Start the import process [https://github.com/new/import](https://github.com/new/import).
 1. Enter the following information in the **Import your project to GitHub** page.
 
@@ -63,7 +63,7 @@ In this exercise, you create an Azure Service Principal to authorize GitHub acce
 
 In this task, you will create a resource group and Azure Service Principal. The service principal is used by GitHub to deploy the desired eShopOnWeb app.
 
-1. In your browser navigate to the [Azure portal](https://portal.azure.com).
+1. In your browser navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com).
 1. Open the **Cloud shell** and select the **Bash** mode. **Note:** You need to configure the persistent storage if this is the first time you launched the Cloud Shell.
 1. Create a resource group with the following `az group create` CLI command. Replace `<location>` with a region near you.
 
@@ -92,7 +92,7 @@ In this task, you will create a resource group and Azure Service Principal. The 
     az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes /subscriptions/<SUBSCRIPTION-ID>/resourceGroups/az2006-rg
     ```
 
-    This command outputs a JSON object that contains the identifiers used to authenticate against Azure in the name of a Microsoft Entra identity (service principal). Copy the JSON object for use in the following steps. 
+    >**IMPORTANT:** This command outputs a JSON object that contains the identifiers used to authenticate against Azure in the name of a Microsoft Entra identity (service principal). Copy the JSON object for use in the following steps. 
 
 1. In a browser window navigate to your **eShopOnWeb** GitHub repository.
 1. On the repository page select **Settings**, then select **Secrets and variables > Actions** in the left navigation pane.

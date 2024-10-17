@@ -61,7 +61,75 @@ In this task you create the following Azure resources:
 * App Service instance
 * Load testing instance
 
-### Task 2: Configure the service principal
+1. In your browser navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com).
+1. Open the **Cloud shell** and select the **Bash** mode. **Note:** You might need to configure the persistent storage if this is the first time launching the Cloud Shell.
+
+1. Run the following commands one at a time to create variables used in the commands in the rest of the steps. Replace `<mylocation>` with your preferred location.
+
+    ```
+    myLocation=<mylocation>
+    myResourceGroup=az2006-rg
+    myAppSvcPlan=az2006webapp-plan
+    myAppName=az2006app$RANDOM
+    myLoadTest=az2006loadtest
+    ```
+1. Run the following command to create the resource group to contain the other resources.
+
+    ```
+    az group create -n $myResourceGroup -l $myLocation
+    ```
+
+1. Run the following command to register the resource provider for the **Azure App Service**.
+
+    ```bash
+    az provider register --namespace Microsoft.Web
+    ```
+
+1. Run the following command to create the App Service plan.
+
+    ```
+    az appservice plan create -g $myResourceGroup -n $myAppSvcPlan --sku F1
+    ```
+
+1. Run the following command to create the App Service instance for the app.
+
+    ```
+    az webapp create -g $myResourceGroup -p $myAppSvcPlan -n $myAppName --runtime "dotnet:8"
+    ```
+
+1. Run the following command to create a load test resource. If you get a prompt to install the **load** extension choose yes.
+
+    ```
+    az load create --name $myLoadTest --resource-group $myResourceGroup --location $myLocation
+    ```
+
+### Task 2: Create and configure the service principal
+
+In this task you create a service principal and configure it for OpenID Connect authorization. You also assign the necessary roles for the service principal to access your resources.
+
+1. Run the following command to create a service principal.
+
+    ```
+    az ad sp create-for-rbac --name GH-Action-webapp
+    ```
+
+1. Run the following commands to assign the "Load Test Contributor" role so the GitHub workflow can send the resource tests to run. 
+
+    ```
+    spAppId=$(az ad sp list --display-name GH-Action-webapp --query "[].{spID:appId}" --output tsv)
+
+    loadTestId=$(az resource show -g $myResourceGroup -n $myLoadTest --resource-type "Microsoft.LoadTestService/loadtests" --query "id" -o tsv)
+
+    az role assignment create --assignee $spAppId --role "Load Test Contributor"  --scope $loadTestId
+    ```
+
+1. Run the following command to assign the "contributor" role so the GitHub workflow can deploy the app to App Service. 
+
+    ```
+    rgId=$(az group show -n $myResourceGroup --query "id" -o tsv)
+    
+    az role assignment create --assignee $spAppId --role contributor --scope $rgId
+    ```
 
 ### Task 6: View load test results
 

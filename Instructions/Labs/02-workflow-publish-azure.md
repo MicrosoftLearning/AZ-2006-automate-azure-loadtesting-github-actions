@@ -86,10 +86,12 @@ In this task, you will create a resource group and Azure Service Principal. The 
 
 1. Retrieve your Azure subscription ID with the `az account show` command. This command produces JSON output, please copy and save the GUID in the `"id": <GUID>` field. This is needed to create the service principal, and is also used later in the lab.
 
-1. Create a service principal with the following `az ad sp` command. Replace `<SUBSCRIPTION-ID>` with the id you copied in the previous step.
+1. Create a service principal with the following commands. The first command stores the id of the resource group to a variable.
 
     ```
-    az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes /subscriptions/<SUBSCRIPTION-ID>/resourceGroups/az2006-rg
+    rgId=$(az group show -n az2006-rg --query "id" -o tsv)
+
+    az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes $rgId
     ```
 
     >**IMPORTANT:** This command outputs a JSON object that contains the identifiers used to authenticate against Azure in the name of a Microsoft Entra identity (service principal). Copy the JSON object for use in the following steps. 

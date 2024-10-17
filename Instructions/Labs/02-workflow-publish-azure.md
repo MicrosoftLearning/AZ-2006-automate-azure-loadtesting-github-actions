@@ -84,7 +84,13 @@ In this task, you will create a resource group and Azure Service Principal. The 
     echo $myAppName
     ```
 
-1. Retrieve your Azure subscription ID with the `az account show` command. This command produces JSON output, please copy and save the GUID in the `"id": <GUID>` field. This is needed to create the service principal, and is also used later in the lab.
+1. Run the following commands to retrieve your subscription ID. Be sure to copy and save the output from the commands, the subscription ID value is used later in this lab.
+
+    ```
+    subId=$(az account list --query "[?isDefault].id" --output tsv)
+    
+    echo $subId
+    ```
 
 1. Create a service principal with the following commands. The first command stores the id of the resource group to a variable.
 

@@ -158,7 +158,15 @@ In this task you assign the necessary roles to the service principal to access y
     az role assignment create --assignee $spAppId --role contributor --scope $rgId
     ```
 
-### Task 6: View load test results
+## Exercise 3: Deploy and test the web app using GitHub Actions
+
+### Task 1: Configure secrets
+
+### Task 2: Deploy the web app
+
+### Task 3: Run a load test
+
+### Task 4: View load test results
 
 When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. If you published the test results as a pipeline artifact, you can also download a CSV file for further reporting.
 

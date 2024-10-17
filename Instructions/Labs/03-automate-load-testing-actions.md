@@ -41,7 +41,7 @@ In this exercise, you will import the [Azure load test sample app](https://githu
     |--|--|
     | **The URL for your source repository** | Enter `https://github.com/MicrosoftLearning/azure-load-test-sample-app` |
     | **Owner** | Select your GitHub alias |
-    | **Repository name** | Enter **AzureLoadTest** |
+    | **Repository name** | Name your repository |
     | **Privacy** | After selecting the **Owner** the privacy options will appear. Select **Public**. |
 
 1. Select **Begin import** and wait for the import process to complete.
@@ -68,15 +68,12 @@ In this task you create the following Azure resources:
 
     ```
     myLocation=<mylocation>
-    myResourceGroup=az2006-rg
-    myAppSvcPlan=az2006webapp-plan
     myAppName=az2006app$RANDOM
-    myLoadTest=az2006loadtest
     ```
 1. Run the following command to create the resource group to contain the other resources.
 
     ```
-    az group create -n $myResourceGroup -l $myLocation
+    az group create -n az2006-rg -l $myLocation
     ```
 
 1. Run the following command to register the resource provider for the **Azure App Service**.
@@ -88,37 +85,67 @@ In this task you create the following Azure resources:
 1. Run the following command to create the App Service plan.
 
     ```
-    az appservice plan create -g $myResourceGroup -n $myAppSvcPlan --sku F1
+    az appservice plan create -g az2006-rg -n az2006webapp-plan --sku F1
     ```
 
 1. Run the following command to create the App Service instance for the app.
 
     ```
-    az webapp create -g $myResourceGroup -p $myAppSvcPlan -n $myAppName --runtime "dotnet:8"
+    az webapp create -g az2006-rg -p az2006webapp-plan -n $myAppName --runtime "dotnet:8"
     ```
 
 1. Run the following command to create a load test resource. If you get a prompt to install the **load** extension choose yes.
 
     ```
-    az load create --name $myLoadTest --resource-group $myResourceGroup --location $myLocation
+    az load create -n az2006loadtest -g az2006-rg --location $myLocation
     ```
 
-### Task 2: Create and configure the service principal
-
-In this task you create a service principal and configure it for OpenID Connect authorization. You also assign the necessary roles for the service principal to access your resources.
-
-1. Run the following command to create a service principal.
+1. Run the following commands to retrieve your subscription ID. Be sure to copy and save the output from the commands, the subscription ID value is used later in this lab.
 
     ```
-    az ad sp create-for-rbac --name GH-Action-webapp
+    subId=$(az account list --query "[?isDefault].id" --output tsv)
+    
+    echo $subId
     ```
+
+### Task 2: Create the service principal and configure authorization
+
+In this task you create a service principal for the app and configure it for OpenID Connect federated authentication.
+
+1. In the Azure portal search for **Microsoft Entra ID** and navigate to the service.
+
+1. In the left navigation pane select **App registrations** in the **Manage** group. 
+
+1. Select **+ New registration** in the main panel and enter `GH-Action-webapp` as the name, and then select **Register**.
+
+    >**IMPORTANT:** Copy and save both the **Application (client) ID** and **Directory (tenant) ID** values for later in this lab.
+
+
+1. In the left navigation pane select **Certificates & secrets** in the **Manage** group, and then in the main window select **Federated credentials**. 
+
+1. Select **Add a credential** and then select **GitHub Actions deploying Azure resources** in the selection drop down.
+
+1. Enter the following information in the **Connect your GitHub account** section.
+
+    | Field | Action |
+    |--|--|
+    | Organization | Enter your user or organization name. Example: `https://github.com/<user>/<repository>`. |
+    | Repository | Enter the name of the repository from earlier in the lab. |
+    | Entity type | Select **Branch**. |
+    | GitHub branch name | Enter **main**. |
+
+1. In the **Credential details** section give your credential a name and then select **Add**.
+
+### Task 3: Assign roles the service principal
+
+In this task you assign the necessary roles to the service principal to access your resources.
 
 1. Run the following commands to assign the "Load Test Contributor" role so the GitHub workflow can send the resource tests to run. 
 
     ```
     spAppId=$(az ad sp list --display-name GH-Action-webapp --query "[].{spID:appId}" --output tsv)
 
-    loadTestId=$(az resource show -g $myResourceGroup -n $myLoadTest --resource-type "Microsoft.LoadTestService/loadtests" --query "id" -o tsv)
+    loadTestId=$(az resource show -g az2006-rg -n az2006loadtest --resource-type "Microsoft.LoadTestService/loadtests" --query "id" -o tsv)
 
     az role assignment create --assignee $spAppId --role "Load Test Contributor"  --scope $loadTestId
     ```
@@ -126,7 +153,7 @@ In this task you create a service principal and configure it for OpenID Connect 
 1. Run the following command to assign the "contributor" role so the GitHub workflow can deploy the app to App Service. 
 
     ```
-    rgId=$(az group show -n $myResourceGroup --query "id" -o tsv)
+    rgId=$(az group show -n az2006-rg --query "id" -o tsv)
     
     az role assignment create --assignee $spAppId --role contributor --scope $rgId
     ```

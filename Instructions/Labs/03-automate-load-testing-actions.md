@@ -1,210 +1,252 @@
 ---
 lab:
-    title: 'Exercise: Automate Azure load testing using GitHub Actions '
+    title: 'Lab 03: Automate Azure Load Testing using GitHub Actions '
     module: 'Module 3: Implement Azure Load Testing'
 ---
 
 # Overview
 
-You can automate a load test in Azure Load Testing by creating a CI/CD pipeline. In this exercise you learn how to configure GitHub Actions to invoke an existing test in Azure load testing. You generate a load against a sample web application that you deploy to Azure App Service. This exercise shows how you can continuously validate your application performance and stability under load.
+In this lab you learn how to configure GitHub Actions to deploy a sample web app and start a load test using Azure Load Testing.
 
-In this exercise you will:
+In this lab you will:
 
-* Deploy a Node.js web API to Azure App Service.
-* Create an Azure Load Testing resource.
-* Configure service authentication to allow GitHub Actions to connect to your Azure load testing resource.
-* Create a load test with load testing YAML config file.
-* Update the GitHub Actions workflow to invoke a test run.
+* Create App Service and Load Testing resources in Azure.
+* Create and configure a service principal to enable GitHub Actions workflows to perform actions in your Azure account.
+* Deploy a .NET 8 application to Azure App Service using a GitHub Actions workflow.
+* Update a GitHub Actions workflow to invoke a URL-based load test.
+
+**Estimated completion time: 40 minutes**
 
 ## Prerequisites
 
 * An **Azure account** with an active subscription. If you don't already have one, you can sign up for a free trial at [https://azure.com/free](https://azure.com/free).
-* A [GitHub](https://github.com?azure-portal=true) account.
-* A GitHub repository to store your Resource Manager templates and your workflow files. Visit [creating a new repository](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-new-repository) for more information.
+    * An Azure web portal supported [browser](https://learn.microsoft.com/azure/azure-portal/azure-portal-supported-browsers-devices).
+    * A Microsoft account or a Microsoft Entra account with the Contributor or the Owner role in the Azure subscription. For details, refer to [List Azure role assignments using the Azure portal](https://docs.microsoft.com/azure/role-based-access-control/role-assignments-list-portal) and [View and assign administrator roles in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/roles/manage-roles-portal).
+* A GitHub account. If you don't have a GitHub account that you can use for this lab, follow instructions available at [Signing up for a new GitHub account](https://github.com/join) to create one.
 
 
 ## Instructions
 
-### Task 1: Deploy a Node.js web API to Azure App Service
+## Exercise 1: Import the sample app to your GitHub repositry
 
-The sample application consists of a Node.js web API, which interacts with a NoSQL database. You deploy the web API to Azure App Service web apps and use Azure Cosmos DB as the database.
+In this exercise, you will import the [Azure load test sample app](https://github.com/MicrosoftLearning/azure-load-test-sample-app) repository into your own GitHub account.
 
-1. Open Windows PowerShell, sign in to Azure, and set the subscription:
+### Task 1: Import the eShopOnWeb repository
 
-   ```azurecli
-   az login
-   az account set --subscription <your-Azure-Subscription-ID>
-   ```
+1. In your web browser navigate to GitHub [http://github.com](http://github.com) and sign in using your account.
+1. Start the import process [https://github.com/new/import](https://github.com/new/import).
+1. Enter the following information in the **Import your project to GitHub** page.
 
-1. Clone the sample application's source repo:
+    | Setting | Action |
+    |--|--|
+    | **The URL for your source repository** | Enter `https://github.com/MicrosoftLearning/azure-load-test-sample-app` |
+    | **Owner** | Select your GitHub alias |
+    | **Repository name** | Name your repository |
+    | **Privacy** | After selecting the **Owner** the privacy options will appear. Select **Public**. |
 
-   ```powershell
-   git clone https://github.com/Azure-Samples/nodejs-appsvc-cosmosdb-bottleneck.git
-   ```
+1. Select **Begin import** and wait for the import process to complete.
+1. On the new repository page select **Settings**, then select  **Actions > General** in the left navigation pane.
+1. In the **Actions permissions** section of the page select the **Allow all actions and reusable workflows** option, and then select **Save**.
 
-   The sample application is a Node.js app that consists of an Azure App Service web component and an Azure Cosmos DB database. The repo includes a PowerShell script that deploys the sample app to your Azure subscription. It also has an Apache JMeter script that you'll use in later steps.
+## Exercise 2: Create resources in Azure
 
-1. Go to the Node.js app's directory and deploy the sample app by using this PowerShell script:
+In this exercise you create the resources in Azure needed to deploy the app and run the test. 
 
-   ```powershell
-   cd nodejs-appsvc-cosmosdb-bottleneck
-   .\deploymentscript.ps1
-   ```
+### Task 1: Create resources using the Azure CLI
 
-   > **Tip:** You can install PowerShell on [Linux/WSL](/powershell/scripting/install/installing-powershell-on-linux) or [macOS](/powershell/scripting/install/installing-powershell-on-macos). After you install it, you can run the previous command as `pwsh ./deploymentscript.ps1`.
+In this task you create the following Azure resources:
 
-1. At the prompt, provide:
+* Resource group
+* App Service Plan
+* App Service instance
+* Load testing instance
 
-   - Your Azure subscription ID.
-   - A unique name for your web app.
-   - A location. By default, the location is `eastus`. You can get region codes by running the [Get-AzLocation](/powershell/module/az.resources/get-azlocation) command.
+1. In your browser navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com).
+1. Open the **Cloud shell** and select the **Bash** mode. **Note:** You might need to configure the persistent storage if this is the first time launching the Cloud Shell.
 
-   > **Important:** For your web app's name, use only lowercase letters and numbers. Don't use spaces or special characters.
+1. Run the following commands one at a time to create variables used in the commands in the rest of the steps. Replace `<mylocation>` with your preferred location.
 
-1. After deployment finishes, go to the running sample application by opening `https://<yourappname>.azurewebsites.net` in a browser window.
+    ```
+    myLocation=<mylocation>
+    myAppName=az2006app$RANDOM
+    ```
+1. Run the following command to create the resource group to contain the other resources.
 
-Now that you have the sample application deployed and running, you can create an Azure load testing resource and a load test.
-
-### Task 2: Create an Azure Load Testing resource
-
-First, you create the top-level resource for Azure Load Testing. It provides a centralized place to view and manage test plans, test results, and related artifacts.
-
-Follow these steps to create an Azure load testing resource and a load test by using the Azure CLI:
-
-1. Open a terminal window and enter the following command to sign in to your Azure subscription.
-
-    ```azurecli
-    az login
+    ```
+    az group create -n az2006-rg -l $myLocation
     ```
 
-1. Go to the sample application directory.
+1. Run the following command to register the resource provider for the **Azure App Service**.
 
-   ```azurecli
-   cd nodejs-appsvc-cosmosdb-bottleneck
-   ```
+    ```bash
+    az provider register --namespace Microsoft.Web
+    ```
 
-1. Create an Azure load testing resource with the [`az load create`](/cli/azure/load) command.
+1. Run the following command to create the App Service plan.
 
-    Replace the `<your-app-name>` text placeholder with the name of your web app. Replace the `<load-testing-resource-name>` text placeholder with the name of the load testing resource.
+    ```
+    az appservice plan create -g az2006-rg -n az2006webapp-plan --sku B1
+    ```
 
-    ```azurecli
-    # This script requires the following Azure CLI extensions:
-    # - load
+1. Run the following command to create the App Service instance for the app.
+
+    ```
+    az webapp create -g az2006-rg -p az2006webapp-plan -n $myAppName --runtime "dotnet:8"
+    ```
+
+1. Run the following command to create a load test resource. If you get a prompt to install the **load** extension choose yes.
+
+    ```
+    az load create -n az2006loadtest -g az2006-rg --location $myLocation
+    ```
+
+1. Run the following commands to retrieve your subscription ID. **Note:** Be sure to copy and save the output from the commands, the subscription ID value is used later in this lab.
+
+    ```
+    subId=$(az account list --query "[?isDefault].id" --output tsv)
     
-    $resourceGroup = "<your-app-name>-rg"
-    $loadTestResource = "my-loadtest"
-    $resourceGroup = "loadtestwebappeastus-rg"
-    $location = "East US"
+    echo $subId
+    ```
+
+### Task 2: Create the service principal and configure authorization
+
+In this task you create a service principal for the app and configure it for OpenID Connect federated authentication.
+
+1. In the Azure portal search for **Microsoft Entra ID** and navigate to the service.
+
+1. In the left navigation pane select **App registrations** in the **Manage** group. 
+
+1. Select **+ New registration** in the main panel and enter `GH-Action-webapp` as the name, and then select **Register**.
+
+    >**IMPORTANT:** Copy and save both the **Application (client) ID** and **Directory (tenant) ID** values for later in this lab.
+
+
+1. In the left navigation pane select **Certificates & secrets** in the **Manage** group, and then in the main window select **Federated credentials**. 
+
+1. Select **Add a credential** and then select **GitHub Actions deploying Azure resources** in the selection drop down.
+
+1. Enter the following information in the **Connect your GitHub account** section. **Note:** These fields are case sensitive. 
+
+    | Field | Action |
+    |--|--|
+    | Organization | Enter your user or organization name. Example: `https://github.com/<user>/<repository>`.  |
+    | Repository | Enter the name of the repository you created earlier in the lab. |
+    | Entity type | Select **Branch**. |
+    | GitHub branch name | Enter **main**. |
+
+1. In the **Credential details** section give your credential a name and then select **Add**.
+
+### Task 3: Assign roles the service principal
+
+In this task you assign the necessary roles to the service principal to access your resources.
+
+1. Run the following commands to assign the "Load Test Contributor" role so the GitHub workflow can send the resource tests to run. 
+
+    ```
+    spAppId=$(az ad sp list --display-name GH-Action-webapp --query "[].{spID:appId}" --output tsv)
+
+    loadTestId=$(az resource show -g az2006-rg -n az2006loadtest --resource-type "Microsoft.LoadTestService/loadtests" --query "id" -o tsv)
+
+    az role assignment create --assignee $spAppId --role "Load Test Contributor"  --scope $loadTestId
+    ```
+
+1. Run the following command to assign the "contributor" role so the GitHub workflow can deploy the app to App Service. 
+
+    ```
+    rgId=$(az group show -n az2006-rg --query "id" -o tsv)
     
-    az load create --name $loadTestResource --resource-group $resourceGroup --location $location
+    az role assignment create --assignee $spAppId --role contributor --scope $rgId
     ```
 
-1. After the resource is created, you can view the details with the `azure load show` command:
+## Exercise 3: Deploy and test the web app using GitHub Actions
 
-    ```azurecli
-    az load show --name $loadTestResource --resource-group $resourceGroup
-    ```
+In this exercise you configure your repository to run the included workflows.
 
-### Task 3: Configure Service authentication
+* The workflows are located in the *.github/workflows* folder of the repo.
+* Both workflows, *deploy.yml* and *loadtest.yml* are configured to run manually.
 
-To run a load test from GitHub Actions workflow, you need to grant permission to the GitHub workflow to access your load testing resource using a service principal.
+During this exercise you edit repository files in the browser. After you select a file to edit, you can either:
+* Select **Edit in place** and when your finished editing commit the changes. 
+* Open the file with **github.dev** to edit with Visual Studio Code in the browser. If you choose this option you can return to the default repository experience by selecting **Return to repository** in the top menu.
 
-To access your Azure Load Testing resource from the GitHub Actions workflow, you first create a Microsoft Entra service principal. This service principal represents your GitHub Actions workflow in Microsoft Entra ID.
+    ![Screenshot of the edit options.](./media/github-edit-options.png)
 
-Next, you grant permissions to the service principal to create and run a load test with your Azure Load Testing resource.
+### Task 1: Configure secrets
 
-#### Create a service principal
+In this task you add secrets to your repo to enable the workflows to login to Azure on your behalf and perform actions.
 
-Create a service principal in the Azure subscription and assign the Load Test Contributor role so that your GitHub Actions workflow has access to your Azure load testing resource to run load tests.
+1. In your web browser navigate to [GitHub](https://github.com) and select the repository you created for this lab. 
+1. Select **Settings** at the top of the repo.
+1. In the left navigation pane select **Secrets and variables**, and then select **Actions**.
+1. In the **Repository secrets** section add the following three secrets. You add a secret by selecting **New repository secret**.
 
-1. Create a service principal and assign the `Load Test Contributor` role:
+    | Name | Secret |
+    |--|--|
+    | AZURE_CLIENT_ID | Enter the **Application (client) ID** you saved earlier in the lab. |
+    | AZURE_TENANT_ID | Enter the **Directory (tenant) ID** you saved earlier in the lab. |
+    | AZURE_SUBSCRIPTION_ID | Enter the subscription id value you saved earlier in the lab. |
 
-      ```azurecli
-      # Get the resource ID for the load testing resource - replace the text place holders.
-      az resource show -g <resource-group-name> -n <load-testing-resource-name> \ 
-          --resource-type "Microsoft.LoadTestService/loadtests" \
-          --query "id" -o tsv
-      ```
+### Task 2: Deploy the web app
 
-    > **Note:** You might get a `--sdk-auth` deprecation warning when you run this command if you are running an older version of the Azure CLI locally.
+1. Select the *deploy.yml* file in the *.github/workflows* folder.
 
-    The output is a JSON object that represents the service principal. You use this information to authenticate with Azure in the GitHub Actions workflow.
+1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>**` with the name of web app created earlier in this lab. Commit your change.
 
-    ```json
-    {
-    "clientId": "<GUID>",
-    "clientSecret": "<secret>",
-    "subscriptionId": "<GUID>",
-    "tenantId": "<GUID>",
-    (...)
-    }
-    ```
+1. Take some time to review the contents of the workflow.
 
-1. Copy the output JSON object to the clipboard.
+1. Select **Actions** in the top navigation of your repo. 
 
-    In the next step, you store the service principal information as a GitHub secret.
+1. Select **Build and publish** in the left navigation pane.
 
-#### Store Azure credentials in GitHub Actions
+1. Select the **Run workflow** drop down and select **Run workflow** keeping the default **Branch: main** setting. The workflow might take a little time to start.
 
-Create a GitHub Actions secret to securely store the service principal information. You use this secret in your workflow definition to connect to authenticate with Azure and access your Azure load testing resource.
+If there are issues with the workflow completing successfully select the **Build and publish** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
 
-To create a GitHub Actions secret:
+### Task 3: Run a load test
 
-1. In [GitHub](https://github.com), browse to your repository where the sample application is located.
+1. Select the *loadtest.yml* file in the *.github/workflows* folder.
 
-1. Select **Settings** > **Secrets & variables** > **Actions**.
+1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>**` with the name of web app created earlier in this lab. Commit your change.
 
-1. Select **New repository secret**, enter the secret information, and then select **Add secret** to create a new secret.
+1. Take some time to review the contents of the workflow.
 
-    | Field | Value |
-    | --- | --- |
-    | **Name**   | *AZURE_CREDENTIALS* |
-    | **Secret** | Paste the JSON output from the service principal creation command you copied earlier. |
+1. Select **Actions** in the top navigation of your repo. 
 
-You can now access your Azure subscription and load testing resource from your GitHub Actions workflow by using the stored credentials.
+1. Select **Load test** in the left navigation pane.
 
-### Task 4: Update the load test YAML file
+1. Select the **Run workflow** drop down and select **Run workflow** keeping the default **Branch: main** setting. The workflow might take a little time to start.
 
-1. Open the SampleApp.jmx file in your repository. Notice how the `Sampleapp.yaml` load test configuration file references the `SampleApp.jmx` JMeter test script.
+    >**NOTE:** It may take 5-10 minutes for the workflow to complete. The test runs for two minutes, and it might take several minutes for the load test to queue and start in Azure. 
 
-1. Notice how the `SampleApp.jmx` JMeter test script uses the `${}` syntax to reference the web app variable in the script: ${udv_webapp}
+If there are issues with the workflow completing successfully select the **Build and publish** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
 
-1. Update the `SampleApp.yaml` to include the following configurations. Notice that you pass in the sample application that you deployed earlier as a variable to the load test. Replace the `<your-app-name>` text placeholder with the name of your web app.
+#### Optional
 
-    ```yaml
-    displayName: Sample Test
-    testPlan: SampleApp.jmx
-    description: Load test the sample app
-    engineInstances: 1
-    testId: sample-app-test
-    testType: JMX
-    splitAllCSVs: False
-    failureCriteria: []
-    env:
-    - name: webapp
-      value: <your-app-name>.azurewebsites.net
-    autoStop:
-      errorPercentage: 90
-      timeWindow: 60
-    ```
+The *config.yaml* file in the root of the repository specifies the failure criteria for the load test. If you want to force the load test to fail perform the following steps.
 
-### Task 5: Update the GitHub Actions workflow and invoke a test run
+1. Edit the *config.yaml* file located in the root of the repository.
+1. Change the value in the `- p90(response_time_ms) > 4000` field to a low value. Changing it to `- p90(response_time_ms) > 50` will most likely cause the test to fail. That represents the app will respond within 50ms 90% of the time. 
 
-Update your GitHub Actions workflow to run a load test for your Azure load testing resource.
+### Task 4: View load test results
 
-1. In your repository navigate to .github\workflows and select workflow.yml
-
-1. Note that the following actions are in the file under the job LoadTest:
-    * the `actions/checkout` action to check out the repository with the load test input files.
-    * the `azure/login` action to authenticate with Azure by using the stored credentials.
-    * the `azure/load-testing` action to run the load test.
-    * the `actions/upload-artifact` action to publish the test results as artifacts in your GitHub Actions workflow run.
-1. Push a commit to main to trigger the workflow.
-1. Go to the Actions tab in your GitHub repository to see the workflow run.
-
-### Task 6: View load test results
-
-When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. If you published the test results as a pipeline artifact, you can also download a CSV file for further reporting.
+When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. Because the test results were saved as a pipeline artifact, you can also download a CSV file for further reporting.
 
 ![Screenshot that shows the workflow logging information.](./media/github-actions-workflow-completed.png)
 
+## Exercise 4: Clean up resources
+
+In this exercise you delete the resources created earlier in the lab.
+
+1. Navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com) and start the Cloud Shell. Select the **Bash** shell session.
+
+1. Run the following command to delete the `az2006-rg` resource group. It will also remove the App Service Plan and App Service instance.
+
+    ```
+    az group delete -n az2006-rg --no-wait --yes
+    ```
+
+    >**Note**: The command executes asynchronously (set with the `--no-wait` parameter), so while you can run another Azure CLI command immediately afterwards within the same Bash session, it will take a few minutes before the resource groups are actually removed.
+
+## Review
+
+In this lab, you implemented GitHub Action workflows that deploys and load tests an Azure Web App.

@@ -161,14 +161,6 @@ In this exercise you delete the resources created earlier in the lab.
 
     >**Note**: The command executes asynchronously (set with the `--no-wait` parameter), so while you can run another Azure CLI command immediately afterwards within the same Bash session, it will take a few minutes before the resource groups are actually removed.
 
-1. Delete the service principal by using the following commands. The first command saves the ID of the *GH-Action-eshoponweb* service principal and the second command deletes it.
-
-    ```
-    servicePrincipalID=$(az ad sp list --display-name GH-Action-eshoponweb --query "[].{spID:appId}" --output tsv)
-    
-    az ad sp delete --id $servicePrincipalID
-    ```
-
 ## Review
 
 In this lab, you implemented a GitHub Action workflow that deploys an Azure Web App.

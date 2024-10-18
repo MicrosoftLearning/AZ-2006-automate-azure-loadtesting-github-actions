@@ -100,7 +100,7 @@ In this task you create the following Azure resources:
     az load create -n az2006loadtest -g az2006-rg --location $myLocation
     ```
 
-1. Run the following commands to retrieve your subscription ID. Be sure to copy and save the output from the commands, the subscription ID value is used later in this lab.
+1. Run the following commands to retrieve your subscription ID. **Note:** Be sure to copy and save the output from the commands, the subscription ID value is used later in this lab.
 
     ```
     subId=$(az account list --query "[?isDefault].id" --output tsv)
@@ -125,12 +125,12 @@ In this task you create a service principal for the app and configure it for Ope
 
 1. Select **Add a credential** and then select **GitHub Actions deploying Azure resources** in the selection drop down.
 
-1. Enter the following information in the **Connect your GitHub account** section.
+1. Enter the following information in the **Connect your GitHub account** section. **Note:** These fields are case sensitive. 
 
     | Field | Action |
     |--|--|
-    | Organization | Enter your user or organization name. Example: `https://github.com/<user>/<repository>`. |
-    | Repository | Enter the name of the repository from earlier in the lab. |
+    | Organization | Enter your user or organization name. Example: `https://github.com/<user>/<repository>`.  |
+    | Repository | Enter the name of the repository you created earlier in the lab. |
     | Entity type | Select **Branch**. |
     | GitHub branch name | Enter **main**. |
 
@@ -160,15 +160,93 @@ In this task you assign the necessary roles to the service principal to access y
 
 ## Exercise 3: Deploy and test the web app using GitHub Actions
 
+In this exercise you configure your repository to run the included workflows.
+
+* The workflows are located in the *.github/workflows* folder of the repo.
+* Both workflows, *deploy.yml* and *loadtest.yml* are configured to run manually.
+
+During this exercise you edit repository files in the browser. After you select a file to edit, you can either:
+* Select **Edit in place** and when your finished editing commit the changes. 
+* Open the file with **github.dev** to edit with Visual Studio Code in the browser. If you choose this option you can return to the default repository experience by selecting **Return to repository** in the top menu.
+
+    ![Screenshot of the edit options.](./media/github-edit-options.png)
+
 ### Task 1: Configure secrets
+
+In this task you add secrets to your repo to enable the workflows to login to Azure on your behalf and perform actions.
+
+1. In your web browser navigate to [GitHub](https://github.com) and select the repository you created for this lab. 
+1. Select **Settings** at the top of the repo.
+1. In the left navigation pane select **Secrets and variables**, and then select **Actions**.
+1. In the **Repository secrets** section add the following three secrets. You add a secret by selecting **New repository secret**.
+
+    | Name | Secret |
+    |--|--|
+    | AZURE_CLIENT_ID | Enter the **Application (client) ID** you saved earlier in the lab. |
+    | AZURE_TENANT_ID | Enter the **Directory (tenant) ID** you saved earlier in the lab. |
+    | AZURE_SUBSCRIPTION_ID | Enter the subscription id value you saved earlier in the lab. |
 
 ### Task 2: Deploy the web app
 
+1. Select the *deploy.yml* file in the *.github/workflows* folder.
+
+1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>**` with the name of web app created earlier in this lab. Commit your change.
+
+1. Take some time to review the contents of the workflow.
+
+1. Select **Actions** in the top navigation of your repo. 
+
+1. Select **Build and publish** in the left navigation pane.
+
+1. Select the **Run workflow** drop down and select **Run workflow** keeping the default **Branch: main** setting. The workflow might take a little time to start.
+
+If there are issues with the workflow completing successfully select the **Build and publish** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
+
 ### Task 3: Run a load test
+
+1. Select the *loadtest.yml* file in the *.github/workflows* folder.
+
+1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>**` with the name of web app created earlier in this lab. Commit your change.
+
+1. Take some time to review the contents of the workflow.
+
+1. Select **Actions** in the top navigation of your repo. 
+
+1. Select **Load test** in the left navigation pane.
+
+1. Select the **Run workflow** drop down and select **Run workflow** keeping the default **Branch: main** setting. The workflow might take a little time to start.
+
+    >**NOTE:** It may take 5-10 minutes for the workflow to complete. The test runs for two minutes, and it might take several minutes for the load test to queue and start in Azure. 
+
+If there are issues with the workflow completing successfully select the **Build and publish** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
+
+#### Optional
+
+The *config.yaml* file in the root of the repository specifies the failure criteria for the load test. If you want to force the load test to fail perform the following steps.
+
+1. Edit the *config.yaml* file located in the root of the repository.
+1. Change the value in the `- p90(response_time_ms) > 4000` field to a low value. Changing it to `- p90(response_time_ms) > 50` will most likely cause the test to fail. That represents the app will respond within 50ms 90% of the time. 
 
 ### Task 4: View load test results
 
-When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. If you published the test results as a pipeline artifact, you can also download a CSV file for further reporting.
+When you run a load test from your CI/CD pipeline, you can view the summary results directly in the CI/CD output log. Because the test results were saved as a pipeline artifact, you can also download a CSV file for further reporting.
 
 ![Screenshot that shows the workflow logging information.](./media/github-actions-workflow-completed.png)
 
+## Exercise 4: Clean up resources
+
+In this exercise you delete the resources created earlier in the lab.
+
+1. Navigate to the Azure portal [https://portal.azure.com](https://portal.azure.com) and start the Cloud Shell. Select the **Bash** shell session.
+
+1. Run the following command to delete the `az2006-rg` resource group. It will also remove the App Service Plan and App Service instance.
+
+    ```
+    az group delete -n az2006-rg --no-wait --yes
+    ```
+
+    >**Note**: The command executes asynchronously (set with the `--no-wait` parameter), so while you can run another Azure CLI command immediately afterwards within the same Bash session, it will take a few minutes before the resource groups are actually removed.
+
+## Review
+
+In this lab, you implemented GitHub Action workflows that deploys and load tests an Azure Web App.

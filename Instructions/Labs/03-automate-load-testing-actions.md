@@ -85,7 +85,7 @@ In this task you create the following Azure resources:
 1. Run the following command to create the App Service plan.
 
     ```
-    az appservice plan create -g az2006-rg -n az2006webapp-plan --sku F1
+    az appservice plan create -g az2006-rg -n az2006webapp-plan --sku B1
     ```
 
 1. Run the following command to create the App Service instance for the app.

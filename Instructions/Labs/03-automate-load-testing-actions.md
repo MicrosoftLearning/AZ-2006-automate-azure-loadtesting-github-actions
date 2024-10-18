@@ -82,7 +82,7 @@ In this task you create the following Azure resources:
     az provider register --namespace Microsoft.Web
     ```
 
-1. Run the following command to create the App Service plan.
+1. Run the following command to create the App Service plan. **Note:** The B1 plan used in the App Service Plan may incur costs. 
 
     ```
     az appservice plan create -g az2006-rg -n az2006webapp-plan --sku B1

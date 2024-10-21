@@ -129,7 +129,7 @@ In this task you create a service principal for the app and configure it for Ope
 
     | Field | Action |
     |--|--|
-    | Organization | Enter your user or organization name. Example: `https://github.com/<user>/<repository>`.  |
+    | Organization | Enter your user or organization name. |
     | Repository | Enter the name of the repository you created earlier in the lab. |
     | Entity type | Select **Branch**. |
     | GitHub branch name | Enter **main**. |

@@ -1,0 +1,14 @@
+Lab 01: No Azure resources are used
+
+Lab 02:
+    - Create a Service Principal
+    - Create Resource Group
+    - Create Azure App Service Plan
+    - Create Azure App Service instance
+
+Lab 03:
+    - Create a Service Principal
+    - Create Resource Group
+    - Create Azure App Service Plan
+    - Create Azure App Service instance
+    - Create Azure Load Testing resource

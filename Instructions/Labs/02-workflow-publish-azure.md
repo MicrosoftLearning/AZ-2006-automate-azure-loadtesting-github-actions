@@ -6,7 +6,7 @@ lab:
 
 # Overview
 
-In this lab, you earn how to implement a GitHub Action workflow that deploys a web app to Azure App Service.
+In this lab, you learn how to implement a GitHub Action workflow that deploys a web app to Azure App Service.
 
 After you complete this lab, you will be able to:
 
@@ -126,7 +126,7 @@ In this task, you modify the provided *eshoponweb-cicd.yml* GitHub workflow and 
     | LOCATION: | `eastus` (Or, the region you selected when creating the resource group.) |
     | TEMPLATE-FILE: | No changes |
     | SUBSCRIPTION-ID: | Your subscription id. |
-    | WEBAPP-NAME: | The randomly generated wep app name you created earlier in the lab. |
+    | WEBAPP-NAME: | The randomly generated web app name you created earlier in the lab. |
 
 1. Read the workflow carefully, comments are provided to help you understand the steps in the workflow.
 1. Uncomment the **on** section at the top of the file by deleting the `#`. The workflow triggers with every push to the main branch and also offers manual triggering (`workflow_dispatch`).

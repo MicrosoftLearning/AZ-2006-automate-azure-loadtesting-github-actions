@@ -27,7 +27,7 @@ In this lab you will:
 
 ## Instructions
 
-## Exercise 1: Import the sample app to your GitHub repositry
+## Exercise 1: Import the sample app to your GitHub repository
 
 In this exercise, you will import the [Azure load test sample app](https://github.com/MicrosoftLearning/azure-load-test-sample-app) repository into your own GitHub account.
 
@@ -136,7 +136,7 @@ In this task you create a service principal for the app and configure it for Ope
 
 1. In the **Credential details** section give your credential a name and then select **Add**.
 
-### Task 3: Assign roles the service principal
+### Task 3: Assign roles to the service principal
 
 In this task you assign the necessary roles to the service principal to access your resources.
 
@@ -182,15 +182,15 @@ In this task you add secrets to your repo to enable the workflows to login to Az
 
     | Name | Secret |
     |--|--|
-    | AZURE_CLIENT_ID | Enter the **Application (client) ID** you saved earlier in the lab. |
-    | AZURE_TENANT_ID | Enter the **Directory (tenant) ID** you saved earlier in the lab. |
-    | AZURE_SUBSCRIPTION_ID | Enter the subscription id value you saved earlier in the lab. |
+    | `AZURE_CLIENT_ID` | Enter the **Application (client) ID** you saved earlier in the lab. |
+    | `AZURE_TENANT_ID` | Enter the **Directory (tenant) ID** you saved earlier in the lab. |
+    | `AZURE_SUBSCRIPTION_ID` | Enter the subscription id value you saved earlier in the lab. |
 
 ### Task 2: Deploy the web app
 
 1. Select the *deploy.yml* file in the *.github/workflows* folder.
 
-1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>**` with the name of web app created earlier in this lab. Commit your change.
+1. Edit the file and, in the **env:** section, change the value of the `AZURE_WEB_APP` variable. Replace `<your web app name>` with the name of web app created earlier in this lab. Commit your change.
 
 1. Take some time to review the contents of the workflow.
 

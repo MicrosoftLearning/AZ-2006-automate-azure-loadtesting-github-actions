@@ -100,13 +100,40 @@ In this task, you will create a resource group and Azure Service Principal. The 
     az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes $rgId
     ```
 
-    >**IMPORTANT:** This command outputs a JSON object that contains the identifiers used to authenticate against Azure in the name of a Microsoft Entra identity (service principal). Copy the JSON object for use in the following steps. 
+    This command outputs a JSON object similar to the following
+
+    ```
+    {
+        "appId": "eb76....be87",
+        "displayName": "GH-Action-eshoponweb",
+        "password": "zpR8Q~.....8P0aVo",
+        "tenant": "dc89.....e0c880"
+    }
+    ```
+1. Modify the JSON obtained from the previous command so that it looks like the following:
+
+    ```
+    {
+        "clientSecret":  "******",
+        "subscriptionId":  "******",
+        "tenantId":  "******",
+        "clientId":  "******"
+    }
+    ```
+
+    where:
+    - `clientSecret` contains the value of the field `password` of the previous JSON;
+    - `clientId` contains the value of the field `appId` of the previous JSON;
+    - `tenantId` contains the value of the field `tenant` of the previous JSON
+    - `subscriptionId` contains the value of the subscription identifier retrieved earlier in this lab
+
+    You can find more information about the JSON at [Azure Login Action](https://github.com/Azure/login?tab=readme-ov-file#creds).
 
 1. In a browser window navigate to your **eShopOnWeb** GitHub repository.
 1. On the repository page select **Settings**, then select **Secrets and variables > Actions** in the left navigation pane.
 1. Select **New repository secret** and enter the following information:
     * **NAME**: `AZURE_CREDENTIALS`
-    * **Secret**: Enter the JSON object generated when creating the service principal.
+    * **Secret**: Enter the JSON object modified previously.
 1. Select **Add secret**.
 
 ### Task 2: Modify and execute the GitHub workflow

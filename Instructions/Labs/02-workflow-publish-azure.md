@@ -97,7 +97,7 @@ In this task, you will create a resource group and Azure Service Principal. The 
     ```
     rgId=$(az group show -n az2006-rg --query "id" -o tsv)
 
-    az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes $rgId
+    az ad sp create-for-rbac --name GH-Action-eshoponweb --role contributor --scopes $rgId --json-auth true
     ```
 
     >**IMPORTANT:** This command outputs a JSON object that contains the identifiers used to authenticate against Azure in the name of a Microsoft Entra identity (service principal). Copy the JSON object for use in the following steps. 

@@ -218,7 +218,7 @@ If there are issues with the workflow completing successfully select the **Build
 
     >**NOTE:** It may take 5-10 minutes for the workflow to complete. The test runs for two minutes, and it might take several minutes for the load test to queue and start in Azure. 
 
-If there are issues with the workflow completing successfully select the **Build and publish** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
+If there are issues with the workflow completing successfully select the **Load test** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
 
 #### Optional
 

@@ -7,6 +7,7 @@ header_pages:
 author: Microsoft Learning
 twitter_username: mslearning
 github_username:  MicrosoftLearning
+title: Automate Azure Load Testing with GitHub Actions
 plugins:
   - jekyll-sitemap
   - jekyll-mentions

@@ -1,7 +1,16 @@
 ---
 lab:
-    title: 'Lab 03: Automate Azure Load Testing using GitHub Actions '
-    module: 'Module 3: Implement Azure Load Testing'
+  title: 'Lab 03: Automate Azure Load Testing using GitHub Actions '
+  module: 'Module 3: Implement Azure Load Testing'
+  description: In this lab you learn how to configure GitHub Actions to deploy a sample
+    web app and start a load test using Azure Load Testing.
+  duration: 40 minutes
+  level: 400
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Load Testing
+  - GitHub
 ---
 
 # Overview

@@ -1,7 +1,15 @@
 ---
 lab:
-    title: 'Lab 02: Use GitHub Actions for Azure to publish a web app to Azure App Service'
-    module: 'Module 2: Implement GitHub Actions for Azure'
+  title: 'Lab 02: Use GitHub Actions for Azure to publish a web app to Azure App Service'
+  module: 'Module 2: Implement GitHub Actions for Azure'
+  description: In this lab, you implemented a GitHub Action workflow that deploys an Azure Web App.
+  duration: 40 minutes
+  level: 500
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure App Service
+    - GitHub
 ---
 
 # Overview

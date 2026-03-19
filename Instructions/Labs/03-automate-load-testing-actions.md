@@ -2,7 +2,7 @@
 lab:
   title: 'Lab 03: Automate Azure Load Testing using GitHub Actions '
   module: 'Module 3: Implement Azure Load Testing'
-  description: In this lab, you implemented GitHub Action workflows that deploys and load tests an Azure Web App.
+  description: In this exercise, you implement GitHub Action workflows that deploys and load tests an Azure Web App.
   duration: 40 minutes
   level: 400
   islab: true

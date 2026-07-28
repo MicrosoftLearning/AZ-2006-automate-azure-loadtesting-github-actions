@@ -20,7 +20,7 @@ In this lab you will:
 
 * Create App Service and Load Testing resources in Azure.
 * Create and configure a service principal to enable GitHub Actions workflows to perform actions in your Azure account.
-* Deploy a .NET 8 application to Azure App Service using a GitHub Actions workflow.
+* Deploy a .NET 10 application to Azure App Service using a GitHub Actions workflow.
 * Update a GitHub Actions workflow to invoke a URL-based load test.
 
 **Estimated completion time: 40 minutes**
@@ -58,7 +58,7 @@ In this exercise, you will import the [Azure load test sample app](https://githu
 
 ## Exercise 2: Create resources in Azure
 
-In this exercise you create the resources in Azure needed to deploy the app and run the test. 
+In this exercise you create the resources in Azure needed to deploy the app and run the test.
 
 ### Task 1: Create resources using the Azure CLI
 
@@ -90,7 +90,7 @@ In this task you create the following Azure resources:
     az provider register --namespace Microsoft.Web
     ```
 
-1. Run the following command to create the App Service plan. **Note:** The B1 plan used in the App Service Plan may incur costs. 
+1. Run the following command to create the App Service plan. **Note:** The B1 plan used in the App Service Plan may incur costs.
 
     ```
     az appservice plan create -g az2006-rg -n az2006webapp-plan --sku B1
@@ -99,7 +99,7 @@ In this task you create the following Azure resources:
 1. Run the following command to create the App Service instance for the app.
 
     ```
-    az webapp create -g az2006-rg -p az2006webapp-plan -n $myAppName --runtime "dotnet:8"
+    az webapp create -g az2006-rg -p az2006webapp-plan -n $myAppName --runtime "dotnet:10"
     ```
 
 1. Run the following command to create a load test resource. If you get a prompt to install the **load** extension choose yes.
@@ -112,7 +112,7 @@ In this task you create the following Azure resources:
 
     ```
     subId=$(az account list --query "[?isDefault].id" --output tsv)
-    
+
     echo $subId
     ```
 
@@ -122,18 +122,18 @@ In this task you create a service principal for the app and configure it for Ope
 
 1. In the Azure portal search for **Microsoft Entra ID** and navigate to the service.
 
-1. In the left navigation pane select **App registrations** in the **Manage** group. 
+1. In the left navigation pane select **App registrations** in the **Manage** group.
 
 1. Select **+ New registration** in the main panel and enter `GH-Action-webapp` as the name, and then select **Register**.
 
     >**IMPORTANT:** Copy and save both the **Application (client) ID** and **Directory (tenant) ID** values for later in this lab.
 
 
-1. In the left navigation pane select **Certificates & secrets** in the **Manage** group, and then in the main window select **Federated credentials**. 
+1. In the left navigation pane select **Certificates & secrets** in the **Manage** group, and then in the main window select **Federated credentials**.
 
 1. Select **Add a credential** and then select **GitHub Actions deploying Azure resources** in the selection drop down.
 
-1. Enter the following information in the **Connect your GitHub account** section. **Note:** These fields are case sensitive. 
+1. Enter the following information in the **Connect your GitHub account** section. **Note:** These fields are case sensitive.
 
     | Field | Action |
     |--|--|
@@ -148,7 +148,7 @@ In this task you create a service principal for the app and configure it for Ope
 
 In this task you assign the necessary roles to the service principal to access your resources.
 
-1. Run the following commands to assign the "Load Test Contributor" role so the GitHub workflow can send the resource tests to run. 
+1. Run the following commands to assign the "Load Test Contributor" role so the GitHub workflow can send the resource tests to run.
 
     ```
     spAppId=$(az ad sp list --display-name GH-Action-webapp --query "[].{spID:appId}" --output tsv)
@@ -158,11 +158,11 @@ In this task you assign the necessary roles to the service principal to access y
     az role assignment create --assignee $spAppId --role "Load Test Contributor"  --scope $loadTestId
     ```
 
-1. Run the following command to assign the "contributor" role so the GitHub workflow can deploy the app to App Service. 
+1. Run the following command to assign the "contributor" role so the GitHub workflow can deploy the app to App Service.
 
     ```
     rgId=$(az group show -n az2006-rg --query "id" -o tsv)
-    
+
     az role assignment create --assignee $spAppId --role contributor --scope $rgId
     ```
 
@@ -174,7 +174,7 @@ In this exercise you configure your repository to run the included workflows.
 * Both workflows, *deploy.yml* and *loadtest.yml* are configured to run manually.
 
 During this exercise you edit repository files in the browser. After you select a file to edit, you can either:
-* Select **Edit in place** and when your finished editing commit the changes. 
+* Select **Edit in place** and when your finished editing commit the changes.
 * Open the file with **github.dev** to edit with Visual Studio Code in the browser. If you choose this option you can return to the default repository experience by selecting **Return to repository** in the top menu.
 
     ![Screenshot of the edit options.](./media/github-edit-options.png)
@@ -183,7 +183,7 @@ During this exercise you edit repository files in the browser. After you select 
 
 In this task you add secrets to your repo to enable the workflows to login to Azure on your behalf and perform actions.
 
-1. In your web browser navigate to [GitHub](https://github.com) and select the repository you created for this lab. 
+1. In your web browser navigate to [GitHub](https://github.com) and select the repository you created for this lab.
 1. Select **Settings** at the top of the repo.
 1. In the left navigation pane select **Secrets and variables**, and then select **Actions**.
 1. In the **Repository secrets** section add the following three secrets. You add a secret by selecting **New repository secret**.
@@ -202,7 +202,7 @@ In this task you add secrets to your repo to enable the workflows to login to Az
 
 1. Take some time to review the contents of the workflow.
 
-1. Select **Actions** in the top navigation of your repo. 
+1. Select **Actions** in the top navigation of your repo.
 
 1. Select **Build and publish** in the left navigation pane.
 
@@ -218,13 +218,13 @@ If there are issues with the workflow completing successfully select the **Build
 
 1. Take some time to review the contents of the workflow.
 
-1. Select **Actions** in the top navigation of your repo. 
+1. Select **Actions** in the top navigation of your repo.
 
 1. Select **Load test** in the left navigation pane.
 
 1. Select the **Run workflow** drop down and select **Run workflow** keeping the default **Branch: main** setting. The workflow might take a little time to start.
 
-    >**NOTE:** It may take 5-10 minutes for the workflow to complete. The test runs for two minutes, and it might take several minutes for the load test to queue and start in Azure. 
+    >**NOTE:** It may take 5-10 minutes for the workflow to complete. The test runs for two minutes, and it might take several minutes for the load test to queue and start in Azure.
 
 If there are issues with the workflow completing successfully select the **Load test** workflow and then select **build** on the next screen. It will provide detailed information about the workflow and can help diagnose what issue prevented it from completing successfully.
 
@@ -233,7 +233,7 @@ If there are issues with the workflow completing successfully select the **Load 
 The *config.yaml* file in the root of the repository specifies the failure criteria for the load test. If you want to force the load test to fail perform the following steps.
 
 1. Edit the *config.yaml* file located in the root of the repository.
-1. Change the value in the `- p90(response_time_ms) > 4000` field to a low value. Changing it to `- p90(response_time_ms) > 50` will most likely cause the test to fail. That represents the app will respond within 50ms 90% of the time. 
+1. Change the value in the `- p90(response_time_ms) > 4000` field to a low value. Changing it to `- p90(response_time_ms) > 50` will most likely cause the test to fail. That represents the app will respond within 50ms 90% of the time.
 
 ### Task 4: View load test results
 
